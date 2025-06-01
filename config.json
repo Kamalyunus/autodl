@@ -1,0 +1,227 @@
+{
+    "data": {
+        "train_path": "data/train.csv",
+        "test_size": 14,
+        "future_promo_path": "data/future_promo.csv",
+        "id_column": "sku",
+        "timestamp_column": "date",
+        "target_column": "sales",
+        "datetime_format": "%Y-%m-%d"
+    },
+    "features": {
+        "known_covariates": [
+            "day_of_week",
+            "day_of_month", 
+            "month",
+            "quarter",
+            "week_of_year",
+            "year",
+            "day_of_year",
+            "is_weekend",
+            "is_month_start",
+            "is_month_end",
+            "day_of_week_sin",
+            "day_of_week_cos",
+            "month_sin",
+            "month_cos",
+            "is_holiday",
+            "days_to_holiday",
+            "is_pre_holiday",
+            "is_post_holiday",
+            "weekend_month_interaction",
+            "holiday_weekend_interaction",
+            "promo_flag",
+            "promo_discount",
+            "special_event",
+            "promo_dow_interaction",
+            "promo_weekend_interaction",
+            "day_of_year_sin_weekly",
+            "day_of_year_cos_weekly",
+            "day_of_year_sin_monthly",
+            "day_of_year_cos_monthly",
+            "day_of_year_sin_quarterly",
+            "day_of_year_cos_quarterly"
+        ],
+        "past_covariates": [
+            "price",
+            "sales_lag_1",
+            "sales_lag_7", 
+            "sales_lag_14",
+            "sales_lag_30",
+            "sales_rolling_mean_7",
+            "sales_rolling_mean_14",
+            "sales_rolling_mean_30",
+            "sales_rolling_std_7",
+            "sales_rolling_std_14",
+            "sales_rolling_std_30",
+            "sales_rolling_min_7",
+            "sales_rolling_min_14",
+            "sales_rolling_min_30",
+            "sales_rolling_max_7",
+            "sales_rolling_max_14",
+            "sales_rolling_max_30",
+            "sales_ewm_7",
+            "sales_ewm_14",
+            "category_total_sales",
+            "category_growth_rate",
+            "category_volatility",
+            "brand_market_share",
+            "brand_popularity_index",
+            "subcategory_competition",
+            "similar_products_avg",
+            "price_rank_in_category",
+            "price_vs_category_median",
+            "trend_strength",
+            "sales_velocity_7d",
+            "sales_velocity_14d",
+            "sales_velocity_21d",
+            "sales_velocity_28d",
+            "sales_acceleration_7d",
+            "sales_acceleration_14d",
+            "sales_acceleration_21d",
+            "sales_acceleration_28d",
+            "change_point_score",
+            "weekly_seasonality",
+            "monthly_seasonality",
+            "historical_promo_effectiveness",
+            "promo_frequency_30d",
+            "days_since_last_promo",
+            "discount_vs_historical_avg",
+            "is_deep_discount",
+            "sales_decline_indicator",
+            "consecutive_decline_days",
+            "decline_magnitude",
+            "volatility_risk_score",
+            "category_instability_index",
+            "market_fragmentation_score",
+            "portfolio_concentration_risk",
+            "market_headwind"
+        ],
+        "static_features": [
+            "category",
+            "subcategory",
+            "brand",
+            "product_group"
+        ],
+        "lag_features": {
+            "sales": [1, 7, 14, 30]
+        },
+        "rolling_features": {
+            "sales": {
+                "windows": [7, 14, 30],
+                "functions": ["mean", "std", "min", "max"]
+            }
+        },
+        "ewm_features": {
+            "sales": {
+                "spans": [7, 14]
+            }
+        }
+    },
+    "model": {
+        "models": [
+            "DeepAR",
+            "TemporalFusionTransformer",
+            "PatchTST",
+            "DLinear",
+            "TiDE",
+            "Chronos"
+        ],
+        "prediction_length": 14,
+        "eval_metric": "MAE",
+        "save_path": "models/autogluon_forecast",
+        "time_limit": 6000,
+        "num_val_windows": 2,
+        "val_step_size": 14,
+        "enable_ensemble": true,
+        "quantile_levels": [0.1, 0.25, 0.5, 0.75, 0.9],
+        "asymmetric_loss": {
+            "enabled": true,
+            "over_penalty_factor": 1.5,
+            "under_penalty_factor": 1.0
+        },
+        "use_custom_hyperparameters": true,
+        "hyperparameters": {
+            "DeepAR": {
+                "max_epochs": 100,
+                "batch_size": 64,
+                "num_layers": 2,
+                "hidden_size": 40,
+                "dropout_rate": 0.1,
+                "lr": 0.001,
+                "context_length": 60
+            },
+            "Chronos": {
+                "model_path": "bolt_base",
+                "covariate_regressor": "CAT",
+                "target_scaler": "standard",
+                "ag_args": {"name_suffix": "WithRegressor"},
+                "fine_tune": true,
+                "fine_tune_lr": 1e-4,
+                "fine_tune_steps": 2000
+
+            },
+            "TemporalFusionTransformer": {
+                "max_epochs": 100,
+                "batch_size": 64,
+                "hidden_size": 32,
+                "attention_head_size": 4,
+                "dropout_rate": 0.1,
+                "lr": 0.001,
+                "context_length": 60
+            },
+            "PatchTST": {
+                "max_epochs": 100,
+                "batch_size": 64,
+                "patch_len": 16,
+                "stride": 8,
+                "d_model": 128,
+                "nhead": 4,
+                "num_encoder_layers": 3,
+                "dim_feedforward": 256,
+                "dropout": 0.1,
+                "lr": 0.001,
+                "context_length": 96
+            },
+            "DLinear": {
+                "max_epochs": 100,
+                "batch_size": 64,
+                "lr": 0.001,
+                "context_length": 60
+            },
+            "TiDE": {
+                "max_epochs": 100,
+                "batch_size": 64,
+                "num_encoder_layers": 2,
+                "num_decoder_layers": 2,
+                "hidden_size": 256,
+                "dropout_rate": 0.3,
+                "lr": 0.001,
+                "context_length": 60
+            }
+        }
+    },
+    "preprocessing": {
+        "handle_missing": {
+            "method": "interpolate",
+            "interpolation_method": "linear",
+            "limit": 7
+        },
+        "handle_outliers": {
+            "method": "clip",
+            "lower_quantile": 0.01,
+            "upper_quantile": 0.99
+        },
+        "min_history_length": 60,
+        "remove_zero_sales_skus": false
+    },
+    "output": {
+        "predictions_path": "output/predictions.csv",
+        "metrics_path": "output/metrics.json",
+        "plots_dir": "output/plots"
+    },
+    "logging": {
+        "log_dir": "logs",
+        "level": "INFO"
+    }
+}

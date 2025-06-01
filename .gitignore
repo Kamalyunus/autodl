@@ -1,0 +1,8 @@
+autodl/
+models/
+logs/
+data/
+output/
+CLAUDE.md
+.claude/
+__pycache__/
