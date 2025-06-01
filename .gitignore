@@ -6,3 +6,4 @@ output/
 CLAUDE.md
 .claude/
 __pycache__/
+.gitignore
